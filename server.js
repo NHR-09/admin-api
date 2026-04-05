@@ -17,14 +17,52 @@ app.use(express.static('public'));
 let serviceAccount;
 try {
   // Try to load from file (local development)
-  serviceAccount = require('./serviceAccountKey.json');
+  try {
+    serviceAccount = require('./serviceAccountKey.json');
+    console.log('✅ Loaded Firebase config from serviceAccountKey.json');
+  } catch {
+    serviceAccount = require('./todo-a6267-firebase-adminsdk-fbsvc-c088bbea0e.json');
+    console.log('✅ Loaded Firebase config from todo-a6267-firebase-adminsdk-fbsvc-c088bbea0e.json');
+  }
 } catch (error) {
   // Try to load from environment variable (Vercel)
-  if (process.env.FIREBASE_CONFIG) {
-    serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
+  console.log('📝 Attempting to load from environment variables...');
+  
+  // Try individual environment variables first
+  if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+    console.log('🔍 Using individual Firebase environment variables');
+    serviceAccount = {
+      type: "service_account",
+      project_id: process.env.FIREBASE_PROJECT_ID,
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: "https://accounts.google.com/o/oauth2/auth",
+      token_uri: "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`,
+      universe_domain: "googleapis.com"
+    };
+    console.log('✅ Successfully created Firebase config from individual env vars');
+  }
+  // Fallback to JSON string
+  else if (process.env.FIREBASE_CONFIG) {
+    try {
+      console.log('🔍 FIREBASE_CONFIG found, parsing JSON...');
+      serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
+      console.log('✅ Successfully parsed FIREBASE_CONFIG');
+    } catch (parseError) {
+      console.error('❌ Failed to parse FIREBASE_CONFIG:', parseError.message);
+      console.error('Raw FIREBASE_CONFIG length:', process.env.FIREBASE_CONFIG.length);
+      console.error('First 100 chars:', process.env.FIREBASE_CONFIG.substring(0, 100));
+      process.exit(1);
+    }
   } else {
     console.error('❌ Firebase credentials not found!');
     console.error('Add serviceAccountKey.json or FIREBASE_CONFIG env variable');
+    console.error('Or set individual env vars: FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL');
+    console.error('Available env vars:', Object.keys(process.env).filter(key => key.includes('FIREBASE')));
     process.exit(1);
   }
 }
@@ -188,11 +226,64 @@ app.get('/api/stats', authenticate, async (req, res) => {
       .count()
       .get();
     
+    // Get user count
+    const usersCount = await db.collection('users').count().get();
+    
     res.json({
       totalNotifications: notificationsCount.data().count,
       activeNotifications: activeNotifications.data().count,
+      totalUsers: usersCount.data().count,
       timestamp: new Date().toISOString()
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all users
+app.get('/api/users', authenticate, async (req, res) => {
+  try {
+    const snapshot = await db.collection('users')
+      .orderBy('lastActiveDate', 'desc')
+      .limit(100)
+      .get();
+    
+    const users = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    res.json({ users });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get user details
+app.get('/api/users/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userDoc = await db.collection('users').doc(id).get();
+    
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const userData = { id: userDoc.id, ...userDoc.data() };
+    
+    // Get user's tasks and lectures count
+    const tasksSnapshot = await db.collection('tasks')
+      .where('userId', '==', id)
+      .get();
+    
+    const lecturesSnapshot = await db.collection('lectures')
+      .where('userId', '==', id)
+      .get();
+    
+    userData.tasksCount = tasksSnapshot.size;
+    userData.lecturesCount = lecturesSnapshot.size;
+    
+    res.json({ user: userData });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

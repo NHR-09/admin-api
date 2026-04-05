@@ -221,6 +221,66 @@
         .delete-btn:hover {
             background: #f56565;
         }
+
+        .user-item {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #48bb78;
+        }
+
+        .user-item h4 {
+            color: #2d3748;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-item .user-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .user-stat {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .user-stat .label {
+            font-size: 11px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .user-stat .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-inactive {
+            background: #fed7d7;
+            color: #742a2a;
+        }
     </style>
 </head>
 <body>
@@ -245,6 +305,10 @@
             <div class="stat-card">
                 <h3>Active Notifications</h3>
                 <div class="value" id="activeNotifications">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <div class="value" id="totalUsers">-</div>
             </div>
         </div>
 
@@ -290,6 +354,12 @@
             <button class="btn" onclick="loadNotifications()" style="margin-bottom: 20px;">Refresh</button>
             <div id="notificationList" class="notification-list"></div>
         </div>
+
+        <div class="card">
+            <h2>👥 Active Users</h2>
+            <button class="btn" onclick="loadUsers()" style="margin-bottom: 20px;">Refresh Users</button>
+            <div id="userList" class="notification-list"></div>
+        </div>
     </div>
 
     <script>
@@ -300,6 +370,7 @@
             document.getElementById('apiKey').value = API_KEY;
             loadStats();
             loadNotifications();
+            loadUsers();
         }
 
         function saveApiKey() {
@@ -308,6 +379,7 @@
             showAlert('API Key saved!', 'success');
             loadStats();
             loadNotifications();
+            loadUsers();
         }
 
         function showAlert(message, type) {
@@ -332,6 +404,7 @@
                     const data = await response.json();
                     document.getElementById('totalNotifications').textContent = data.totalNotifications;
                     document.getElementById('activeNotifications').textContent = data.activeNotifications;
+                    document.getElementById('totalUsers').textContent = data.totalUsers;
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
@@ -360,7 +433,105 @@
             }
         }
 
+        async function loadUsers() {
+            if (!API_KEY) {
+                showAlert('Please enter your API key first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/users`, {
+                    headers: { 'x-api-key': API_KEY }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+                
+                const data = await response.json();
+                displayUsers(data.users);
+            } catch (error) {
+                showAlert('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        function displayUsers(users) {
+            const list = document.getElementById('userList');
+            
+            if (users.length === 0) {
+                list.innerHTML = '<p style="color: #718096;">No users found</p>';
+                return;
+            }
+            
+            list.innerHTML = users.map(user => {
+                const lastActive = user.lastActiveDate ? new Date(user.lastActiveDate) : null;
+                const isActive = lastActive && (Date.now() - lastActive.getTime()) < 7 * 24 * 60 * 60 * 1000; // Active within 7 days
+                const level = user.currentLevel || 1;
+                const xp = user.totalXP || 0;
+                const streak = user.streakDays || 0;
+                const tasksCompleted = user.totalTasksCompleted || 0;
+                const lecturesCompleted = user.totalLecturesCompleted || 0;
+                
+                return `
+                    <div class="user-item">
+                        <h4>
+                            ${user.username || 'Anonymous User'}
+                            <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                                ${isActive ? 'Active' : 'Inactive'}
+                            </span>
+                        </h4>
+                        <div class="user-stats">
+                            <div class="user-stat">
+                                <div class="label">Level</div>
+                                <div class="value">${level}</div>
+                            </div>
+                            <div class="user-stat">
+                                <div class="label">Total XP</div>
+                                <div class="value">${xp.toLocaleString()}</div>
+                            </div>
+                            <div class="user-stat">
+                                <div class="label">Streak</div>
+                                <div class="value">${streak}d</div>
+                            </div>
+                            <div class="user-stat">
+                                <div class="label">Tasks</div>
+                                <div class="value">${tasksCompleted}</div>
+                            </div>
+                            <div class="user-stat">
+                                <div class="label">Lectures</div>
+                                <div class="value">${lecturesCompleted}</div>
+                            </div>
+                        </div>
+                        <div class="meta">
+                            <span>ID: ${user.id}</span>
+                            <span>Last Active: ${lastActive ? lastActive.toLocaleDateString() : 'Never'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function displayNotifications(notifications) {
+            const list = document.getElementById('notificationList');
+            
+            if (notifications.length === 0) {
+                list.innerHTML = '<p style="color: #718096;">No notifications yet</p>';
+                return;
+            }
+            
+            list.innerHTML = notifications.map(n => `
+                <div class="notification-item">
+                    <h4>${n.title}</h4>
+                    <p>${n.message}</p>
+                    <div class="meta">
+                        <span class="badge badge-${n.type}">${n.type}</span>
+                        <span>${new Date(n.createdAt).toLocaleString()}</span>
+                        <span>${n.active ? '✅ Active' : '❌ Inactive'}</span>
+                        <button class="delete-btn" onclick="deleteNotification('${n.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
             const list = document.getElementById('notificationList');
             
             if (notifications.length === 0) {
