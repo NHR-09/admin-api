@@ -185,7 +185,7 @@ app.post('/api/notifications/:id/deactivate', authenticate, async (req, res) => 
 // Broadcast notification to all users
 app.post('/api/notifications/broadcast', authenticate, async (req, res) => {
   try {
-    const { title, message, type, actionUrl, imageUrl } = req.body;
+    const { title, message, type, actionUrl, imageUrl, pollOptions } = req.body;
     
     if (!title || !message || !type) {
       return res.status(400).json({ 
@@ -202,7 +202,8 @@ app.post('/api/notifications/broadcast', authenticate, async (req, res) => {
       active: true,
       actionUrl: actionUrl || null,
       imageUrl: imageUrl || null,
-      broadcast: true
+      broadcast: true,
+      pollOptions: pollOptions || null
     };
 
     await db.collection('notifications').doc(notification.id).set(notification);
@@ -210,6 +211,49 @@ app.post('/api/notifications/broadcast', authenticate, async (req, res) => {
     res.status(201).json({ 
       success: true, 
       message: 'Notification broadcasted to all users',
+      notification 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send notification to specific user(s)
+app.post('/api/notifications/targeted', authenticate, async (req, res) => {
+  try {
+    const { title, message, type, actionUrl, imageUrl, userIds, pollOptions } = req.body;
+    
+    if (!title || !message || !type) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: title, message, type' 
+      });
+    }
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ 
+        error: 'userIds must be a non-empty array' 
+      });
+    }
+
+    const notification = {
+      id: uuidv4(),
+      title,
+      message,
+      type,
+      createdAt: new Date().toISOString(),
+      active: true,
+      actionUrl: actionUrl || null,
+      imageUrl: imageUrl || null,
+      broadcast: false,
+      targetUserIds: userIds,
+      pollOptions: pollOptions || null
+    };
+
+    await db.collection('notifications').doc(notification.id).set(notification);
+    
+    res.status(201).json({ 
+      success: true, 
+      message: `Notification sent to ${userIds.length} user(s)`,
       notification 
     });
   } catch (error) {
@@ -235,6 +279,51 @@ app.get('/api/stats', authenticate, async (req, res) => {
       activeNotifications: activeNotifications.data().count,
       totalUsers: usersCount,
       timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get poll results
+app.get('/api/notifications/:id/poll-results', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const votesSnapshot = await db.collection('notifications').doc(id).collection('votes').get();
+    
+    const votes = votesSnapshot.docs.map(doc => doc.data());
+    const results = {};
+    
+    votes.forEach(vote => {
+      results[vote.optionId] = (results[vote.optionId] || 0) + 1;
+    });
+    
+    res.json({ 
+      notificationId: id,
+      totalVotes: votes.length,
+      results,
+      votes 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get feedback responses
+app.get('/api/notifications/:id/feedback', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const feedbackSnapshot = await db.collection('notifications').doc(id).collection('feedback').get();
+    
+    const feedback = feedbackSnapshot.docs.map(doc => ({
+      userId: doc.id,
+      ...doc.data()
+    }));
+    
+    res.json({ 
+      notificationId: id,
+      totalResponses: feedback.length,
+      feedback 
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -95,7 +95,8 @@ select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3C
 .chip-announcement{background:rgba(123,143,161,.12);color:var(--slate)}
 .chip-update{background:rgba(143,185,150,.12);color:#5a9c66}
 .chip-feature{background:rgba(212,184,150,.2);color:#8a6d45}
-.chip-maintenance{background:rgba(196,120,91,.12);color:var(--terracotta)}
+.chip-poll{background:rgba(212,184,150,.2);color:#8a6d45}
+.chip-feedback{background:rgba(143,185,150,.12);color:#5a9c66}
 
 /* ── Notification Items ── */
 .notif-item{background:var(--milk);border:1px solid var(--fog);border-radius:var(--radius-sm);padding:16px;margin-bottom:10px;transition:all .25s;position:relative;overflow:hidden}
@@ -103,12 +104,15 @@ select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3C
 .notif-item.t-announcement::before{background:var(--slate)}
 .notif-item.t-update::before{background:var(--sage)}
 .notif-item.t-feature::before{background:var(--sand)}
-.notif-item.t-maintenance::before{background:var(--terracotta)}
+.notif-item.t-poll::before{background:var(--sand)}
+.notif-item.t-feedback::before{background:var(--sage)}
 .notif-item:hover{border-color:var(--sand);box-shadow:0 4px 16px rgba(42,42,42,.04)}
 .notif-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
 .notif-title{font-weight:700;font-size:14px;color:var(--charcoal)}
 .notif-msg{color:var(--dusty);font-size:13px;line-height:1.5;margin-bottom:10px}
 .notif-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dusty)}
+.notif-target{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;background:rgba(143,185,150,.12);color:var(--sage);margin-left:8px}
+.notif-target svg{width:10px;height:10px}
 .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
 .status-dot.active{background:var(--sage)}
 .status-dot.inactive{background:var(--terracotta)}
@@ -300,15 +304,55 @@ select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3C
           <h2>Send Notification</h2>
         </div>
         <form id="notificationForm">
+          <div class="form-group">
+            <label>Target Audience</label>
+            <div style="display:flex;gap:12px;margin-bottom:12px">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500">
+                <input type="radio" name="audience" value="all" checked onchange="toggleUserSelect()"> All Users
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500">
+                <input type="radio" name="audience" value="specific" onchange="toggleUserSelect()"> Specific Users
+              </label>
+            </div>
+          </div>
+          <div id="userSelectGroup" class="form-group" style="display:none">
+            <label for="targetUsers">Select Users</label>
+            <select id="targetUsers" class="form-control" multiple style="min-height:120px">
+              <!-- Users will be populated here -->
+            </select>
+            <small style="color:var(--dusty);font-size:11px;margin-top:4px;display:block">Hold Ctrl/Cmd to select multiple users</small>
+          </div>
           <div class="form-group"><label for="title">Title</label><input type="text" id="title" class="form-control" placeholder="Notification title" required></div>
           <div class="form-group"><label for="message">Message</label><textarea id="message" class="form-control" placeholder="Write your message..." required></textarea></div>
-          <div class="form-group"><label for="type">Type</label>
-            <select id="type" class="form-control" required>
+          <div class="form-group">
+            <label for="type">Type</label>
+            <select id="type" class="form-control" required onchange="togglePollOptions()">
               <option value="announcement">Announcement</option>
               <option value="update">Update</option>
               <option value="feature">New Feature</option>
               <option value="maintenance">Maintenance</option>
+              <option value="poll">Poll</option>
+              <option value="feedback">Feedback Request</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label for="imageFile">Image <span style="font-weight:400;color:var(--dusty)">(optional)</span></label>
+            <input type="file" id="imageFile" class="form-control" accept="image/*" onchange="previewImage(this)">
+            <div id="imagePreview" style="margin-top:12px;display:none">
+              <img id="previewImg" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px">
+              <button type="button" onclick="clearImage()" class="btn btn-ghost btn-sm" style="margin-top:8px">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Remove Image
+              </button>
+            </div>
+          </div>
+          <div id="pollOptionsGroup" class="form-group" style="display:none">
+            <label>Poll Options</label>
+            <div id="pollOptionsList"></div>
+            <button type="button" onclick="addPollOption()" class="btn btn-ghost btn-sm" style="margin-top:8px">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Option
+            </button>
           </div>
           <div class="form-group"><label for="actionUrl">Action URL <span style="font-weight:400;color:var(--dusty)">(optional)</span></label><input type="url" id="actionUrl" class="form-control" placeholder="https://..."></div>
           <button type="submit" class="btn btn-primary"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send</button>
@@ -341,6 +385,9 @@ select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3C
 <script>
 const API_BASE = window.location.origin;
 let API_KEY = localStorage.getItem('adminApiKey') || '';
+let allUsers = []; // Store users for dropdown
+let pollOptionCount = 0; // Track poll options
+let uploadedImageBase64 = null; // Store uploaded image
 
 // SVG icon helpers
 const SVG = {
@@ -351,6 +398,7 @@ const SVG = {
   grad: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 10 3 12 0v-5"/></svg>',
   chart: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
   trash: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  users: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   inbox: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>',
   ok: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
   warn: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
@@ -414,13 +462,19 @@ async function loadUsers() {
     const r = await fetch(`${API_BASE}/api/users`, { headers: getHeaders() });
     if (!r.ok) throw new Error('Unauthorized');
     const d = await r.json();
+    allUsers = d.users || []; // Store for dropdown
     const el = document.getElementById('users');
-    document.getElementById('userCount').textContent = d.users?.length || 0;
-    if (!d.users || !d.users.length) {
+    document.getElementById('userCount').textContent = allUsers.length;
+    
+    // Populate user select dropdown
+    const select = document.getElementById('targetUsers');
+    select.innerHTML = allUsers.map(u => `<option value="${u.id}">${u.username} (Level ${u.level}, ${u.xp} XP)</option>`).join('');
+    
+    if (!allUsers.length) {
       el.innerHTML = `<div class="empty-state">${SVG.inbox}<h3>No users yet</h3><p>Users will appear once they start using the app</p></div>`;
       return;
     }
-    el.innerHTML = `<div class="users-wrap"><table class="users-table"><thead><tr><th>Username</th><th>XP</th><th>Level</th><th>Streak</th><th>Tasks</th><th>Lectures</th><th>Last Active</th></tr></thead><tbody>${d.users.map(u => `
+    el.innerHTML = `<div class="users-wrap"><table class="users-table"><thead><tr><th>Username</th><th>XP</th><th>Level</th><th>Streak</th><th>Tasks</th><th>Lectures</th><th>Last Active</th></tr></thead><tbody>${allUsers.map(u => `
       <tr onclick="viewUser('${u.id}')">
         <td class="user-name-cell">${u.username}</td>
         <td class="xp-cell">${u.xp || 0}</td>
@@ -549,13 +603,23 @@ async function loadNotifications() {
       el.innerHTML = `<div class="empty-state">${SVG.inbox}<h3>No notifications</h3><p>Create your first using the form</p></div>`;
       return;
     }
-    el.innerHTML = d.notifications.map(n => `
+    el.innerHTML = d.notifications.map(n => {
+      const targetBadge = n.broadcast ? '' : `<span class="notif-target">${SVG.users} ${n.targetUserIds?.length || 0} user(s)</span>`;
+      const actionButtons = n.type === 'poll' 
+        ? `<button class="btn btn-ghost btn-sm btn-icon" onclick="viewPollResults('${n.id}')" title="View Results">${SVG.chart}</button>`
+        : n.type === 'feedback'
+        ? `<button class="btn btn-ghost btn-sm btn-icon" onclick="viewFeedback('${n.id}')" title="View Feedback">${SVG.inbox}</button>`
+        : '';
+      const imagePreview = n.imageUrl ? `<img src="${n.imageUrl}" style="width:100%;border-radius:8px;margin-top:8px;max-height:150px;object-fit:cover" onclick="viewFullImage('${n.imageUrl}')" title="Click to view full size">` : '';
+      return `
       <div class="notif-item t-${n.type}">
-        <div class="notif-top"><div><div class="notif-title">${n.title}</div><span class="chip chip-${n.type}">${n.type}</span></div>
-        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteNotification('${n.id}')" title="Delete">${SVG.trash}</button></div>
+        <div class="notif-top"><div><div class="notif-title">${n.title}${targetBadge}</div><span class="chip chip-${n.type}">${n.type}</span></div>
+        <div style="display:flex;gap:4px">${actionButtons}<button class="btn btn-danger btn-sm btn-icon" onclick="deleteNotification('${n.id}')" title="Delete">${SVG.trash}</button></div></div>
         <div class="notif-msg">${n.message}</div>
+        ${imagePreview}
         <div class="notif-meta"><span>${new Date(n.createdAt).toLocaleDateString()} ${new Date(n.createdAt).toLocaleTimeString()}</span><span><span class="status-dot ${n.active?'active':'inactive'}"></span>${n.active?'Active':'Inactive'}</span></div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   } catch (e) {
     document.getElementById('notifications').innerHTML = `<div class="toast toast-error" style="position:static;width:100%">${SVG.warn} Failed: ${e.message}</div>`;
     if (e.message === 'Unauthorized') logout();
@@ -563,13 +627,105 @@ async function loadNotifications() {
 }
 
 // ── Send Notification ──
+function toggleUserSelect() {
+  const audience = document.querySelector('input[name="audience"]:checked').value;
+  const userSelectGroup = document.getElementById('userSelectGroup');
+  userSelectGroup.style.display = audience === 'specific' ? 'block' : 'none';
+}
+
+function togglePollOptions() {
+  const type = document.getElementById('type').value;
+  const pollGroup = document.getElementById('pollOptionsGroup');
+  pollGroup.style.display = type === 'poll' ? 'block' : 'none';
+  if (type === 'poll' && pollOptionCount === 0) {
+    addPollOption();
+    addPollOption();
+  }
+}
+
+function addPollOption() {
+  pollOptionCount++;
+  const list = document.getElementById('pollOptionsList');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center';
+  div.innerHTML = `
+    <input type="text" class="form-control poll-option-input" placeholder="Option ${pollOptionCount}" style="flex:1">
+    <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm btn-icon">${SVG.trash}</button>
+  `;
+  list.appendChild(div);
+}
+
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      uploadedImageBase64 = e.target.result;
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('imagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function clearImage() {
+  uploadedImageBase64 = null;
+  document.getElementById('imageFile').value = '';
+  document.getElementById('imagePreview').style.display = 'none';
+}
+
 document.getElementById('notificationForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const fd = { title: document.getElementById('title').value, message: document.getElementById('message').value, type: document.getElementById('type').value, actionUrl: document.getElementById('actionUrl').value || null };
+  const audience = document.querySelector('input[name="audience"]:checked').value;
+  const type = document.getElementById('type').value;
+  const fd = { 
+    title: document.getElementById('title').value, 
+    message: document.getElementById('message').value, 
+    type, 
+    actionUrl: document.getElementById('actionUrl').value || null,
+    imageUrl: uploadedImageBase64 || null
+  };
+  
+  // Add poll options if type is poll
+  if (type === 'poll') {
+    const optionInputs = document.querySelectorAll('.poll-option-input');
+    const options = Array.from(optionInputs)
+      .map(input => input.value.trim())
+      .filter(text => text.length > 0)
+      .map((text, i) => ({ id: `opt_${i+1}`, text, votes: 0 }));
+    
+    if (options.length < 2) {
+      showToast('Poll must have at least 2 options', 'error');
+      return;
+    }
+    fd.pollOptions = options;
+  }
+  
+  let endpoint = `${API_BASE}/api/notifications/broadcast`;
+  
+  if (audience === 'specific') {
+    const select = document.getElementById('targetUsers');
+    const selectedUsers = Array.from(select.selectedOptions).map(opt => opt.value);
+    if (selectedUsers.length === 0) {
+      showToast('Please select at least one user', 'error');
+      return;
+    }
+    fd.userIds = selectedUsers;
+    endpoint = `${API_BASE}/api/notifications/targeted`;
+  }
+  
   try {
-    const r = await fetch(`${API_BASE}/api/notifications/broadcast`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(fd) });
+    const r = await fetch(endpoint, { method: 'POST', headers: getHeaders(), body: JSON.stringify(fd) });
     const res = await r.json();
-    if (r.ok) { showToast('Notification sent successfully!'); document.getElementById('notificationForm').reset(); init(); }
+    if (r.ok) { 
+      showToast(res.message || 'Notification sent successfully!'); 
+      document.getElementById('notificationForm').reset(); 
+      document.querySelector('input[name="audience"][value="all"]').checked = true;
+      toggleUserSelect();
+      pollOptionCount = 0;
+      document.getElementById('pollOptionsList').innerHTML = '';
+      clearImage();
+      init(); 
+    }
     else throw new Error(res.error || 'Failed to send');
   } catch (e) { showToast(`Error: ${e.message}`, 'error'); }
 });
@@ -582,6 +738,36 @@ async function deleteNotification(id) {
     if (r.ok) { showToast('Notification deleted'); init(); }
     else { const res = await r.json(); showToast(`Error: ${res.error}`, 'error'); }
   } catch (e) { showToast(`Error: ${e.message}`, 'error'); }
+}
+
+// ── View Poll Results ──
+async function viewPollResults(id) {
+  try {
+    const r = await fetch(`${API_BASE}/api/notifications/${id}/poll-results`, { headers: getHeaders() });
+    if (!r.ok) throw new Error('Failed to fetch results');
+    const data = await r.json();
+    alert(`Poll Results (${data.totalVotes} votes):\n${JSON.stringify(data.results, null, 2)}`);
+  } catch (e) { showToast(`Error: ${e.message}`, 'error'); }
+}
+
+// ── View Feedback ──
+async function viewFeedback(id) {
+  try {
+    const r = await fetch(`${API_BASE}/api/notifications/${id}/feedback`, { headers: getHeaders() });
+    if (!r.ok) throw new Error('Failed to fetch feedback');
+    const data = await r.json();
+    const feedbackText = data.feedback.map(f => `• ${f.feedback}`).join('\n');
+    alert(`Feedback (${data.totalResponses} responses):\n\n${feedbackText || 'No feedback yet'}`);
+  } catch (e) { showToast(`Error: ${e.message}`, 'error'); }
+}
+
+// ── View Full Image ──
+function viewFullImage(imageUrl) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(42,42,42,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';
+  modal.innerHTML = `<img src="${imageUrl}" style="max-width:90%;max-height:90%;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,0.5)">`;
+  modal.onclick = () => modal.remove();
+  document.body.appendChild(modal);
 }
 
 // ── Init ──
