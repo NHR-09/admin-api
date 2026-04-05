@@ -227,12 +227,13 @@ app.get('/api/stats', authenticate, async (req, res) => {
       .get();
     
     // Get user count
-    const usersCount = await db.collection('users').count().get();
+    const usersSnapshot = await db.collection('users').get();
+    const usersCount = usersSnapshot.size;
     
     res.json({
       totalNotifications: notificationsCount.data().count,
       activeNotifications: activeNotifications.data().count,
-      totalUsers: usersCount.data().count,
+      totalUsers: usersCount,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -243,18 +244,54 @@ app.get('/api/stats', authenticate, async (req, res) => {
 // Get all users
 app.get('/api/users', authenticate, async (req, res) => {
   try {
-    const snapshot = await db.collection('users')
-      .orderBy('lastActiveDate', 'desc')
-      .limit(100)
-      .get();
+    const snapshot = await db.collection('users').get();
     
-    const users = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
+    const users = await Promise.all(snapshot.docs.map(async doc => {
+      const data = doc.data();
+      const stats = data.stats || {};
+      
+      // Get tasks count
+      const tasksSnapshot = await db.collection('users').doc(doc.id).collection('tasks').get();
+      const completedTasks = tasksSnapshot.docs.filter(t => t.data().completed).length;
+      
+      // Get lectures count
+      const lecturesSnapshot = await db.collection('users').doc(doc.id).collection('lectures').get();
+      const completedLectures = lecturesSnapshot.docs.filter(l => l.data().completed).length;
+      
+      // Handle timestamp conversion safely
+      let lastActive = null;
+      if (stats.lastActiveDate) {
+        lastActive = stats.lastActiveDate;
+      } else if (data.updatedAt && typeof data.updatedAt.toDate === 'function') {
+        lastActive = data.updatedAt.toDate().toISOString();
+      }
+      
+      return {
+        id: doc.id,
+        username: stats.username || 'Super Hero',
+        xp: stats.totalXP || 0,
+        level: stats.currentLevel || 1,
+        streakDays: stats.streakDays || 0,
+        completedTasks: stats.totalTasksCompleted || completedTasks,
+        completedLectures: stats.totalLecturesCompleted || completedLectures,
+        totalTasks: tasksSnapshot.size,
+        totalLectures: lecturesSnapshot.size,
+        lastActiveDate: lastActive,
+        currentTheme: stats.currentTheme || 'iron_man',
+        totalStudyMinutes: stats.totalStudyMinutes || 0,
+      };
     }));
+    
+    // Sort by last active date
+    users.sort((a, b) => {
+      if (!a.lastActiveDate) return 1;
+      if (!b.lastActiveDate) return -1;
+      return new Date(b.lastActiveDate) - new Date(a.lastActiveDate);
+    });
     
     res.json({ users });
   } catch (error) {
+    console.error('Error fetching users:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -269,25 +306,87 @@ app.get('/api/users/:id', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    const userData = { id: userDoc.id, ...userDoc.data() };
+    const data = userDoc.data();
+    const stats = data.stats || {};
     
-    // Get user's tasks and lectures count
-    const tasksSnapshot = await db.collection('tasks')
-      .where('userId', '==', id)
-      .get();
+    // Get user's tasks
+    const tasksSnapshot = await db.collection('users').doc(id).collection('tasks').get();
+    const tasks = tasksSnapshot.docs.map(doc => {
+      const taskData = doc.data();
+      return {
+        id: doc.id,
+        title: taskData.title || 'Untitled',
+        description: taskData.description || '',
+        completed: taskData.completed || false,
+        xpValue: taskData.xpValue || 20,
+        createdAt: taskData.createdAt || null,
+        completedAt: taskData.completedAt || null,
+        priority: taskData.priority || 1,
+        category: taskData.category || 0,
+      };
+    });
     
-    const lecturesSnapshot = await db.collection('lectures')
-      .where('userId', '==', id)
-      .get();
+    // Get user's lectures
+    const lecturesSnapshot = await db.collection('users').doc(id).collection('lectures').get();
+    const lectures = lecturesSnapshot.docs.map(doc => {
+      const lectureData = doc.data();
+      return {
+        id: doc.id,
+        title: lectureData.title || 'Untitled',
+        subtitle: lectureData.subtitle || '',
+        url: lectureData.url || '',
+        completed: lectureData.completed || false,
+        watchedSeconds: lectureData.watchedSeconds || 0,
+        totalDurationSeconds: lectureData.totalDurationSeconds || 0,
+        courseId: lectureData.courseId || null,
+        courseTitle: lectureData.courseTitle || '',
+        createdAt: lectureData.createdAt || null,
+      };
+    });
     
-    userData.tasksCount = tasksSnapshot.size;
-    userData.lecturesCount = lecturesSnapshot.size;
+    // Skip daily stats to avoid Firebase index requirement
+    const dailyStats = [];
+    
+    // Handle timestamp conversion safely
+    let lastActive = null;
+    if (stats.lastActiveDate) {
+      lastActive = stats.lastActiveDate;
+    } else if (data.updatedAt && typeof data.updatedAt.toDate === 'function') {
+      lastActive = data.updatedAt.toDate().toISOString();
+    }
+    
+    const userData = {
+      id: userDoc.id,
+      username: stats.username || 'Super Hero',
+      xp: stats.totalXP || 0,
+      level: stats.currentLevel || 1,
+      heroTitle: _getHeroTitle(stats.currentLevel || 1),
+      streakDays: stats.streakDays || 0,
+      lastActiveDate: lastActive,
+      totalTasksCompleted: stats.totalTasksCompleted || 0,
+      totalLecturesCompleted: stats.totalLecturesCompleted || 0,
+      totalStudyMinutes: stats.totalStudyMinutes || 0,
+      currentTheme: stats.currentTheme || 'iron_man',
+      unlockedThemes: stats.unlockedThemes ? stats.unlockedThemes.split(',') : ['iron_man'],
+      tasks,
+      lectures,
+      dailyStats,
+    };
     
     res.json({ user: userData });
   } catch (error) {
+    console.error('Error fetching user details:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+function _getHeroTitle(level) {
+  if (level >= 20) return 'LEGEND';
+  if (level >= 15) return 'CHAMPION';
+  if (level >= 10) return 'AVENGER';
+  if (level >= 5) return 'AGENT';
+  return 'RECRUIT';
+}
 
 // Start server
 if (process.env.NODE_ENV !== 'production') {
