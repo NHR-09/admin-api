@@ -12,37 +12,183 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            color: #333;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         .header {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
         }
 
         .header h1 {
-            color: #2d3748;
-            font-size: 32px;
+            font-size: 2.5rem;
+            font-weight: 300;
             margin-bottom: 10px;
         }
 
         .header p {
-            color: #718096;
-            font-size: 14px;
+            opacity: 0.9;
+            font-size: 1.1rem;
         }
 
-        .stats {
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: #f7fafc;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+            transform: translateY(-1px);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .notification-item {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .notification-item:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .notification-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .type-announcement { background: #bee3f8; color: #2b6cb0; }
+        .type-update { background: #c6f6d5; color: #2f855a; }
+        .type-feature { background: #fbb6ce; color: #b83280; }
+        .type-maintenance { background: #fed7d7; color: #c53030; }
+
+        .notification-message {
+            color: #4a5568;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .notification-meta {
+            font-size: 12px;
+            color: #718096;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
@@ -51,567 +197,287 @@
 
         .stat-card {
             background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-
-        .stat-card h3 {
-            color: #718096;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .stat-card .value {
-            color: #2d3748;
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .card h2 {
-            color: #2d3748;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            color: #4a5568;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .notification-list {
-            margin-top: 20px;
-        }
-
-        .notification-item {
-            background: #f7fafc;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border-left: 4px solid #667eea;
-        }
-
-        .notification-item h4 {
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-
-        .notification-item p {
-            color: #718096;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .notification-item .meta {
-            display: flex;
-            gap: 16px;
-            font-size: 12px;
-            color: #a0aec0;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-update { background: #c6f6d5; color: #22543d; }
-        .badge-announcement { background: #fed7d7; color: #742a2a; }
-        .badge-feature { background: #feebc8; color: #7c2d12; }
-        .badge-maintenance { background: #e2e8f0; color: #2d3748; }
-
-        .alert {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .alert-success {
-            background: #c6f6d5;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
-        }
-
-        .alert-error {
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #fc8181;
-        }
-
-        .api-key-input {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .api-key-input input {
-            flex: 1;
-        }
-
-        .delete-btn {
-            background: #fc8181;
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-left: 8px;
-        }
-
-        .delete-btn:hover {
-            background: #f56565;
-        }
-
-        .user-item {
-            background: #f7fafc;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border-left: 4px solid #48bb78;
-        }
-
-        .user-item h4 {
-            color: #2d3748;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-item .user-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin: 12px 0;
-        }
-
-        .user-stat {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 6px;
+            padding: 20px;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .user-stat .label {
-            font-size: 11px;
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
             color: #718096;
-            margin-bottom: 4px;
+            font-size: 14px;
         }
 
-        .user-stat .value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2d3748;
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .status-active {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        .status-inactive {
+        .error {
             background: #fed7d7;
-            color: #742a2a;
+            color: #c53030;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .notification-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .notification-actions {
+                margin-top: 8px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🦸 Marvel Todo Admin</h1>
-            <p>Send notifications and manage app updates</p>
+            <h1>Marvel Todo Admin</h1>
+            <p>Manage notifications and monitor app activity</p>
         </div>
 
-        <div class="api-key-input">
-            <input type="password" id="apiKey" placeholder="Enter your API key">
-            <button class="btn" onclick="saveApiKey()">Save API Key</button>
+        <!-- Stats Section -->
+        <div id="stats" class="stats-grid">
+            <!-- Stats will be loaded here -->
         </div>
 
-        <div id="alert" class="alert"></div>
-
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Total Notifications</h3>
-                <div class="value" id="totalNotifications">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Active Notifications</h3>
-                <div class="value" id="activeNotifications">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Users</h3>
-                <div class="value" id="totalUsers">-</div>
-            </div>
-        </div>
-
+        <!-- Create Notification Form -->
         <div class="card">
             <h2>📢 Send Notification</h2>
             <form id="notificationForm">
                 <div class="form-group">
-                    <label>Title *</label>
-                    <input type="text" id="title" required placeholder="e.g., New Feature Released!">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" class="form-control" placeholder="Enter notification title" required>
                 </div>
-
+                
                 <div class="form-group">
-                    <label>Message *</label>
-                    <textarea id="message" required placeholder="Describe the notification..."></textarea>
+                    <label for="message">Message</label>
+                    <textarea id="message" class="form-control" placeholder="Enter notification message" required></textarea>
                 </div>
-
+                
                 <div class="form-group">
-                    <label>Type *</label>
-                    <select id="type" required>
-                        <option value="update">Update</option>
-                        <option value="announcement">Announcement</option>
-                        <option value="feature">Feature</option>
-                        <option value="maintenance">Maintenance</option>
+                    <label for="type">Type</label>
+                    <select id="type" class="form-control" required>
+                        <option value="announcement">📢 Announcement</option>
+                        <option value="update">🔄 Update</option>
+                        <option value="feature">✨ New Feature</option>
+                        <option value="maintenance">🔧 Maintenance</option>
                     </select>
                 </div>
-
+                
                 <div class="form-group">
-                    <label>Action URL (optional)</label>
-                    <input type="url" id="actionUrl" placeholder="https://example.com">
+                    <label for="actionUrl">Action URL (Optional)</label>
+                    <input type="url" id="actionUrl" class="form-control" placeholder="https://example.com">
                 </div>
-
-                <div class="form-group">
-                    <label>Image URL (optional)</label>
-                    <input type="url" id="imageUrl" placeholder="https://example.com/image.png">
-                </div>
-
-                <button type="submit" class="btn">Send Notification</button>
+                
+                <button type="submit" class="btn btn-primary">Send Notification</button>
             </form>
         </div>
 
+        <!-- Notifications List -->
         <div class="card">
             <h2>📋 Recent Notifications</h2>
-            <button class="btn" onclick="loadNotifications()" style="margin-bottom: 20px;">Refresh</button>
-            <div id="notificationList" class="notification-list"></div>
-        </div>
-
-        <div class="card">
-            <h2>👥 Active Users</h2>
-            <button class="btn" onclick="loadUsers()" style="margin-bottom: 20px;">Refresh Users</button>
-            <div id="userList" class="notification-list"></div>
+            <div id="notifications">
+                <div class="loading">Loading notifications...</div>
+            </div>
         </div>
     </div>
 
     <script>
-        let API_KEY = localStorage.getItem('adminApiKey') || '';
-        const API_URL = window.location.origin;
+        const API_BASE = window.location.origin;
+        const API_KEY = 'NHR09abc';
 
-        if (API_KEY) {
-            document.getElementById('apiKey').value = API_KEY;
-            loadStats();
-            loadNotifications();
-            loadUsers();
-        }
+        const headers = {
+            'Content-Type': 'application/json',
+            'x-api-key': API_KEY
+        };
 
-        function saveApiKey() {
-            API_KEY = document.getElementById('apiKey').value;
-            localStorage.setItem('adminApiKey', API_KEY);
-            showAlert('API Key saved!', 'success');
-            loadStats();
-            loadNotifications();
-            loadUsers();
-        }
-
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            alert.style.display = 'block';
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 3000);
-        }
-
+        // Load stats
         async function loadStats() {
-            if (!API_KEY) return;
-            
             try {
-                const response = await fetch(`${API_URL}/api/stats`, {
-                    headers: { 'x-api-key': API_KEY }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('totalNotifications').textContent = data.totalNotifications;
-                    document.getElementById('activeNotifications').textContent = data.activeNotifications;
-                    document.getElementById('totalUsers').textContent = data.totalUsers;
-                }
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-
-        async function loadNotifications() {
-            if (!API_KEY) {
-                showAlert('Please enter your API key first', 'error');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/api/notifications`, {
-                    headers: { 'x-api-key': API_KEY }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to load notifications');
-                }
-                
+                const response = await fetch(`${API_BASE}/api/stats`, { headers });
                 const data = await response.json();
-                displayNotifications(data.notifications);
-            } catch (error) {
-                showAlert('Error loading notifications: ' + error.message, 'error');
-            }
-        }
-
-        async function loadUsers() {
-            if (!API_KEY) {
-                showAlert('Please enter your API key first', 'error');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/api/users`, {
-                    headers: { 'x-api-key': API_KEY }
-                });
                 
-                if (!response.ok) {
-                    throw new Error('Failed to load users');
-                }
-                
-                const data = await response.json();
-                displayUsers(data.users);
-            } catch (error) {
-                showAlert('Error loading users: ' + error.message, 'error');
-            }
-        }
-
-        function displayUsers(users) {
-            const list = document.getElementById('userList');
-            
-            if (users.length === 0) {
-                list.innerHTML = '<p style="color: #718096;">No users found</p>';
-                return;
-            }
-            
-            list.innerHTML = users.map(user => {
-                const lastActive = user.lastActiveDate ? new Date(user.lastActiveDate) : null;
-                const isActive = lastActive && (Date.now() - lastActive.getTime()) < 7 * 24 * 60 * 60 * 1000; // Active within 7 days
-                const level = user.currentLevel || 1;
-                const xp = user.totalXP || 0;
-                const streak = user.streakDays || 0;
-                const tasksCompleted = user.totalTasksCompleted || 0;
-                const lecturesCompleted = user.totalLecturesCompleted || 0;
-                
-                return `
-                    <div class="user-item">
-                        <h4>
-                            ${user.username || 'Anonymous User'}
-                            <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
-                                ${isActive ? 'Active' : 'Inactive'}
-                            </span>
-                        </h4>
-                        <div class="user-stats">
-                            <div class="user-stat">
-                                <div class="label">Level</div>
-                                <div class="value">${level}</div>
-                            </div>
-                            <div class="user-stat">
-                                <div class="label">Total XP</div>
-                                <div class="value">${xp.toLocaleString()}</div>
-                            </div>
-                            <div class="user-stat">
-                                <div class="label">Streak</div>
-                                <div class="value">${streak}d</div>
-                            </div>
-                            <div class="user-stat">
-                                <div class="label">Tasks</div>
-                                <div class="value">${tasksCompleted}</div>
-                            </div>
-                            <div class="user-stat">
-                                <div class="label">Lectures</div>
-                                <div class="value">${lecturesCompleted}</div>
-                            </div>
-                        </div>
-                        <div class="meta">
-                            <span>ID: ${user.id}</span>
-                            <span>Last Active: ${lastActive ? lastActive.toLocaleDateString() : 'Never'}</span>
-                        </div>
+                document.getElementById('stats').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${data.totalNotifications || 0}</div>
+                        <div class="stat-label">Total Notifications</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${data.activeNotifications || 0}</div>
+                        <div class="stat-label">Active Notifications</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${data.totalUsers || 0}</div>
+                        <div class="stat-label">Total Users</div>
                     </div>
                 `;
-            }).join('');
-        }
-
-        function displayNotifications(notifications) {
-            const list = document.getElementById('notificationList');
-            
-            if (notifications.length === 0) {
-                list.innerHTML = '<p style="color: #718096;">No notifications yet</p>';
-                return;
-            }
-            
-            list.innerHTML = notifications.map(n => `
-                <div class="notification-item">
-                    <h4>${n.title}</h4>
-                    <p>${n.message}</p>
-                    <div class="meta">
-                        <span class="badge badge-${n.type}">${n.type}</span>
-                        <span>${new Date(n.createdAt).toLocaleString()}</span>
-                        <span>${n.active ? '✅ Active' : '❌ Inactive'}</span>
-                        <button class="delete-btn" onclick="deleteNotification('${n.id}')">Delete</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-            const list = document.getElementById('notificationList');
-            
-            if (notifications.length === 0) {
-                list.innerHTML = '<p style="color: #718096;">No notifications yet</p>';
-                return;
-            }
-            
-            list.innerHTML = notifications.map(n => `
-                <div class="notification-item">
-                    <h4>${n.title}</h4>
-                    <p>${n.message}</p>
-                    <div class="meta">
-                        <span class="badge badge-${n.type}">${n.type}</span>
-                        <span>${new Date(n.createdAt).toLocaleString()}</span>
-                        <span>${n.active ? '✅ Active' : '❌ Inactive'}</span>
-                        <button class="delete-btn" onclick="deleteNotification('${n.id}')">Delete</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function deleteNotification(id) {
-            if (!confirm('Are you sure you want to delete this notification?')) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/notifications/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'x-api-key': API_KEY }
-                });
-                
-                if (response.ok) {
-                    showAlert('Notification deleted!', 'success');
-                    loadNotifications();
-                    loadStats();
-                } else {
-                    throw new Error('Failed to delete');
-                }
             } catch (error) {
-                showAlert('Error deleting notification: ' + error.message, 'error');
+                console.error('Failed to load stats:', error);
+                document.getElementById('stats').innerHTML = '';
             }
         }
 
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                const response = await fetch(`${API_BASE}/api/notifications`, { headers });
+                const data = await response.json();
+                
+                const container = document.getElementById('notifications');
+                
+                if (!data.notifications || data.notifications.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No notifications yet</h3>
+                            <p>Create your first notification using the form above</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = data.notifications.map(notification => `
+                    <div class="notification-item">
+                        <div class="notification-header">
+                            <div>
+                                <div class="notification-title">${notification.title}</div>
+                                <span class="notification-type type-${notification.type}">${notification.type}</span>
+                            </div>
+                            <div class="notification-actions">
+                                <button class="btn btn-danger btn-small" onclick="deleteNotification('${notification.id}')">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-meta">
+                            <span>${new Date(notification.createdAt).toLocaleDateString()} ${new Date(notification.createdAt).toLocaleTimeString()}</span>
+                            <span>${notification.active ? '🟢 Active' : '🔴 Inactive'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('notifications').innerHTML = `
+                    <div class="error">Failed to load notifications: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Send notification
         document.getElementById('notificationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            if (!API_KEY) {
-                showAlert('Please enter your API key first', 'error');
-                return;
-            }
-            
-            const notification = {
+            const formData = {
                 title: document.getElementById('title').value,
                 message: document.getElementById('message').value,
                 type: document.getElementById('type').value,
-                actionUrl: document.getElementById('actionUrl').value || null,
-                imageUrl: document.getElementById('imageUrl').value || null
+                actionUrl: document.getElementById('actionUrl').value || null
             };
             
             try {
-                const response = await fetch(`${API_URL}/api/notifications/broadcast`, {
+                const response = await fetch(`${API_BASE}/api/notifications/broadcast`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': API_KEY
-                    },
-                    body: JSON.stringify(notification)
+                    headers,
+                    body: JSON.stringify(formData)
                 });
                 
-                if (!response.ok) {
-                    throw new Error('Failed to send notification');
-                }
+                const result = await response.json();
                 
-                showAlert('Notification sent successfully!', 'success');
-                document.getElementById('notificationForm').reset();
-                loadNotifications();
-                loadStats();
+                if (response.ok) {
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'success';
+                    successDiv.textContent = 'Notification sent successfully!';
+                    document.querySelector('.card').insertBefore(successDiv, document.getElementById('notificationForm'));
+                    
+                    // Clear form
+                    document.getElementById('notificationForm').reset();
+                    
+                    // Reload data
+                    loadNotifications();
+                    loadStats();
+                    
+                    // Remove success message after 3 seconds
+                    setTimeout(() => successDiv.remove(), 3000);
+                } else {
+                    throw new Error(result.error || 'Failed to send notification');
+                }
             } catch (error) {
-                showAlert('Error sending notification: ' + error.message, 'error');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = `Error: ${error.message}`;
+                document.querySelector('.card').insertBefore(errorDiv, document.getElementById('notificationForm'));
+                
+                setTimeout(() => errorDiv.remove(), 5000);
             }
         });
+
+        // Delete notification
+        async function deleteNotification(id) {
+            if (!confirm('Are you sure you want to delete this notification?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/notifications/${id}`, {
+                    method: 'DELETE',
+                    headers
+                });
+                
+                if (response.ok) {
+                    loadNotifications();
+                    loadStats();
+                } else {
+                    const result = await response.json();
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Initialize
+        loadStats();
+        loadNotifications();
     </script>
 </body>
 </html>
